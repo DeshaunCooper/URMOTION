@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URMOTION | Performance Streaming</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #000000;
+            --surface: #0A0A0A;
+            --volt: #A8FF00;
+            --volt-glow: rgba(168, 255, 0, 0.2);
+            --text-main: #FFFFFF;
+            --text-dim: #888888;
+            --border: rgba(255, 255, 255, 0.1);
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background-color: var(--black); 
+            color: var(--text-main); 
+            font-family: 'Inter', sans-serif; 
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- GLOBAL UTILITIES --- */
+        .mono { font-family: 'JetBrains Mono', monospace; text-transform: uppercase; font-size: 11px; letter-spacing: 0.2em; color: var(--volt); }
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid var(--border); }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 5%; }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            padding: 30px 5%; display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+        .logo { font-weight: 900; font-size: 24px; letter-spacing: -1px; }
+        .logo span { color: var(--volt); }
+
+        /* --- HERO SECTION --- */
+        .hero { 
+            height: 100vh; display: flex; align-items: center; position: relative;
+            overflow: hidden; padding-top: 100px;
+        }
+        .hero-bg {
+            position: absolute; inset: 0; z-index: -1;
+            background: radial-gradient(circle at 70% 30%, var(--volt-glow) 0%, transparent 50%);
+        }
+        .hero-content { max-width: 600px; z-index: 2; }
+        .hero h1 { font-size: clamp(48px, 8vw, 110px); font-weight: 900; line-height: 0.85; margin: 20px 0; letter-spacing: -0.05em; }
+        .hero p { font-size: 20px; color: var(--text-dim); margin-bottom: 40px; line-height: 1.5; font-weight: 300; }
+        
+        .cta-btn {
+            display: inline-block; padding: 20px 40px; background: var(--volt); color: #000;
+            text-decoration: none; font-weight: 700; border-radius: 4px; transition: 0.3s var(--ease);
+        }
+        .cta-btn:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--volt-glow); }
+
+        /* --- STICKY MOCKUP CORE --- */
+        .experience-viewer {
+            position: relative; min-height: 400vh; display: flex;
+        }
+        .mockup-sticky-wrap {
+            position: sticky; top: 0; height: 100vh; width: 50%;
+            display: flex; align-items: center; justify-content: center; z-index: 10;
+        }
+        .device-mockup {
+            width: 320px; height: 650px; border-radius: 45px; border: 12px solid #1A1A1A;
+            position: relative; background: #000; box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+            transition: transform 0.8s var(--ease); transform: perspective(1000px) rotateY(-10deg);
+        }
+        .device-screen { 
+            position: absolute; inset: 0; border-radius: 33px; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        .screen-content { padding: 20px; flex: 1; transition: opacity 0.5s ease; }
+        
+        /* Dashboard UI Sample */
+        .ui-header { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .ui-avatar { width: 35px; height: 35px; background: #222; border-radius: 50%; }
+        .ui-card { background: var(--surface); padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
+        .ui-reward-val { font-size: 28px; font-weight: 900; color: var(--volt); margin-top: 5px; }
+        .ui-ring { width: 150px; height: 150px; border-radius: 50%; border: 10px solid var(--volt); margin: 20px auto; display: flex; align-items: center; justify-content: center; position: relative;}
+        .ui-ring::after { content: "84%"; font-weight: 900; font-size: 24px; }
+
+        /* --- CONTENT SCROLL AREA --- */
+        .content-tracks { width: 50%; padding-left: 5%; }
+        .track-section { height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+        
+        /* STREAMING ROWS */
+        .streaming-row { display: flex; gap: 20px; overflow-x: auto; padding: 20px 0; scrollbar-width: none; }
+        .tile { 
+            min-width: 200px; height: 280px; background: var(--surface); border-radius: 8px; 
+            border: 1px solid var(--border); transition: 0.4s var(--ease); position: relative; overflow: hidden;
+        }
+        .tile:hover { border-color: var(--volt); transform: translateY(-10px); }
+        .tile-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
+        .tile-label { position: absolute; bottom: 15px; left: 15px; font-weight: 700; font-size: 14px; }
+
+        /* --- U+ PREMIUM SECTION --- */
+        .u-plus-feature {
+            background: linear-gradient(to right, #050505, #000);
+            border: 1px solid var(--volt-glow); box-shadow: 0 0 50px rgba(168, 255, 0, 0.05);
+            padding: 80px; border-radius: 24px; position: relative; overflow: hidden;
+        }
+        .u-plus-feature::before {
+            content: "U+"; position: absolute; top: -20px; right: -20px; font-size: 200px;
+            font-weight: 900; color: var(--volt); opacity: 0.03;
+        }
+
+        /* --- REWARDS ANIMATION --- */
+        .reward-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .reward-item { padding: 30px; border-radius: 12px; background: var(--surface); border-left: 4px solid var(--volt); }
+
+        footer { padding: 100px 5%; text-align: center; border-top: 1px solid var(--border); }
+
+        @media (max-width: 1024px) {
+            .mockup-sticky-wrap { display: none; }
+            .hero-content, .content-tracks { width: 100%; padding: 0 5%; }
+            .experience-viewer { display: block; min-height: auto; }
+            .track-section { height: auto; padding: 80px 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">UR<span>MOTION</span></div>
+        <div class="nav-links">
+            <a href="#" class="mono" style="color: white; text-decoration: none;">Streaming</a>
+            <a href="#" class="mono" style="color: var(--text-dim); text-decoration: none; margin-left: 30px;">Premium</a>
+        </div>
+    </nav>
+
+    <div class="hero container">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <span class="mono">Performance Streaming Platform</span>
+            <h1>The Velocity <br>of Value.</h1>
+            <p>Urmotion is the premium ecosystem where physical discipline becomes digital currency. High-production content meets real-time motivation.</p>
+            <a href="#" class="cta-btn">Initialize Performance</a>
+        </div>
+    </div>
+
+    <main class="experience-viewer">
+        <div class="mockup-sticky-wrap">
+            <div class="device-mockup" id="mainMockup">
+                <div class="device-screen glass">
+                    <div class="screen-content" id="screenHome">
+                        <div class="ui-header">
+                            <div class="ui-avatar"></div>
+                            <span class="mono" style="color: #666">Home</span>
+                        </div>
+                        <div class="ui-card">
+                            <span class="mono" style="font-size: 9px;">Daily Earnings</span>
+                            <div class="ui-reward-val">+$12.40</div>
+                        </div>
+                        <div class="ui-ring"></div>
+                        <div class="ui-card" style="margin-top: 20px; border-color: var(--volt);">
+                            <span class="mono" style="font-size: 9px; color: var(--volt);">Active Challenge</span>
+                            <p style="font-weight: 700; margin-top: 5px;">Power Sprint: $25 Reward</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-tracks">
+            <section class="track-section">
+                <span class="mono">Earning Rows</span>
+                <h2 style="font-size: 42px; margin: 20px 0;">Start Earning Now.</h2>
+                <div class="streaming-row">
+                    <div class="tile">
+                        <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=400&q=80" class="tile-img">
+                        <span class="tile-label">High-Intensity Sprint</span>
+                    </div>
+                    <div class="tile">
+                        <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=400&q=80" class="tile-img">
+                        <span class="tile-label">Mobility Flow</span>
+                    </div>
+                    <div class="tile">
+                        <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=400&q=80" class="tile-img">
+                        <span class="tile-label">Strength Core</span>
+                    </div>
+                </div>
+                <p style="color: var(--text-dim); margin-top: 30px;">Cinematic rows designed like premium streaming tiles. Every session is a transaction in your favor.</p>
+            </section>
+
+            <section class="track-section">
+                <div class="u-plus-feature">
+                    <span class="mono" style="color: var(--volt);">Elite Performance</span>
+                    <h2 style="font-size: 42px; margin: 20px 0;">The U+ Masterclass</h2>
+                    <p style="color: var(--text-dim); line-height: 1.6; margin-bottom: 30px;">The premium tier. Unlock 4K cinematic coaching from world-class performance architects. Higher stakes, higher payouts, absolute quality.</p>
+                    <div class="tile" style="width: 100%; height: 200px; border-color: var(--volt);">
+                         <img src="https://images.unsplash.com/photo-1594381898411-846e7d193883?auto=format&fit=crop&w=800&q=80" class="tile-img" style="opacity: 0.8">
+                         <div style="position: absolute; inset: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px; display: flex; align-items: flex-end;">
+                            <span class="mono">Premium Series: The Mindset of Speed</span>
+                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="track-section">
+                <span class="mono">Corporate Infrastructure</span>
+                <h2 style="font-size: 42px; margin: 20px 0;">Sponsor Success.</h2>
+                <div class="reward-grid">
+                    <div class="reward-item">
+                        <div class="mono" style="color: var(--text-dim); font-size: 9px; margin-bottom: 10px;">AdventHealth</div>
+                        <p style="font-weight: 700;">Community Step Challenge</p>
+                    </div>
+                    <div class="reward-item">
+                        <div class="mono" style="color: var(--text-dim); font-size: 9px; margin-bottom: 10px;">Google Cloud</div>
+                        <p style="font-weight: 700;">Wellness Sprint 2026</p>
+                    </div>
+                </div>
+                <p style="color: var(--text-dim); margin-top: 30px;">Urmotion scales as corporate wellness infrastructure. Companies sponsor the motivation; you provide the motion.</p>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <span class="mono">Initialization Complete</span>
+        <h2 style="font-size: 48px; margin: 30px 0;">Movement is Currency.</h2>
+        <a href="#" class="cta-btn">Join the Urmotion Ecosystem</a>
+        <div style="margin-top: 80px; opacity: 0.3;">
+            <p class="mono">© 2026 URMOTION PRODUCT SYSTEMS. ALL RIGHTS RESERVED.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Simple Parallax and Device Rotation Effect
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY;
+            const device = document.getElementById('mainMockup');
+            
+            // Subtle rotation as user scrolls
+            const rotation = -10 + (scrolled * 0.02);
+            const limitedRotation = Math.min(Math.max(rotation, -10), 10);
+            
+            if (window.innerWidth > 1024) {
+                device.style.transform = `perspective(1000px) rotateY(${limitedRotation}deg) translateY(${scrolled * 0.05}px)`;
+            }
+        });
+
+        // Intersection Observer for Section Highlights
+        const observerOptions = { threshold: 0.5 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Logic to swap screen content can go here
+                    // e.g., if(entry.target.classList.contains('u-plus-feature')) { ... }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.track-section').forEach(section => observer.observe(section));
+    </script>
+</body>
+</html>
